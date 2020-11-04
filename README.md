@@ -31,15 +31,34 @@ yarn install
 yarn run brave-versions
 ```
 
-Generated metadata lives by default in `$HOME/.brave-versions/final-releases.json`
+By default, generated json is written to `brave-versions.json`
 
 # Configuration
 
-Configuration is currently done through environment variables / dotenv.
+Configuration is currently done through command line switches and environment variables / dotenv.
 
-| Environment Variable | Description |
+**Command line**
+
+```bash
+$ brave-versions --help
+Usage: brave-versions [options]
+
+Options:
+  -V, --version            output the version number
+  --brave-browser <dir>    existing brave-browser git repo (default: "/Users/marshall/.brave-versions/brave-browser")
+  --cache-dir <dir>        cache in dir (default: "/Users/marshall/.brave-versions")
+  --cache-github-releases  enable cached github releases (default: false)
+  --no-git-pull            skip git pull in brave-browser (default: git pull to update)
+  -o, --output <file>      path to output json manifest (default: brave-versions.json)
+  -h, --help               display help for command
+
+```
+
+**Environment Variables**
+
+| Name | Description |
 | -------------------- | ------------|
-| `BRAVE_VERSIONS_DIR` | path where the dataset is saved, by default this is $HOME/.brave-versions |
+| `BRAVE_VERSIONS_DIR` | path where data is cached, by default this is $HOME/.brave-versions |
 | `GITHUB_TOKEN` | optional authorization token for Github API (use to raise the Github API rate limit) |
 
 # Data format

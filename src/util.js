@@ -22,19 +22,22 @@ export async function pathExists(path) {
   }
 }
 
-export async function braveVersionsDir(child) {
-  const braveVersionsDir = process.env.BRAVE_VERSIONS_DIR || process.env.HOME + '/.brave-versions';
-
-  if (!await pathExists(braveVersionsDir)) {
+export async function ensureDirExists(dir) {
+  if (!await pathExists(dir)) {
     try {
-      await fs.promises.mkdir(braveVersionsDir);
-      console.log(`storing brave version data in ${braveVersionsDir}`);
+      await fs.promises.mkdir(dir);
+      console.log(`[mkdir] ${dir}`);
+      return true;
     } catch (e) {
-      console.error(`can't initialize ${braveVersionsDir}:`, e);
+      console.error(`can't initialize ${dir}:`, e);
       throw e;
     }
   }
+  return true;
+}
 
+export function braveVersionsDir(child) {
+  const braveVersionsDir = process.env.BRAVE_VERSIONS_DIR || process.env.HOME + '/.brave-versions';
   return child ? path.join(braveVersionsDir, child) : braveVersionsDir;
 }
 

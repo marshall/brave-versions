@@ -1,19 +1,56 @@
 #!/usr/bin/env node
+import path from 'path';
+import process from 'process';
 
+import { program } from 'commander';
 import dotenv from 'dotenv';
 dotenv.config()
 
-
-import { fetchGithub } from './fetch-github';
-import fetchGit, { fetchGitReleases } from './fetch-git';
-import { braveVersionsDir, multibar, writeJSON } from './util';
+import { GithubFetcher } from './fetch-github';
+import { GitFetcher } from './fetch-git';
+import { braveVersionsDir, ensureDirExists, multibar, writeJSON } from './util';
+import pkg from '../package.json';
 
 async function main() {
-  let ghFetcher = await fetchGithub();
+  program
+    .name(pkg.name)
+    .version(pkg.version)
+    .option('--brave-browser <dir>', 'existing brave-browser git repo',
+            braveVersionsDir('brave-browser'))
+    .option('--cache-dir <dir>', 'cache in dir', braveVersionsDir())
+    .option('--cache-github-releases', 'enable cached github releases', false)
+    .option('--no-git-pull', 'skip git pull in brave-browser (default: git pull to update)')
+    .option('-o, --output <file>', 'path to output json manifest (default: brave-versions.json)');
+  program.parse(process.argv);
+
+
+  const {
+    braveBrowser,
+    cacheGithubReleases,
+    cacheDir,
+    gitPull,
+    output,
+  } = program;
+
+  console.log({
+    braveBrowser,
+    cacheGithubReleases,
+    cacheDir,
+    gitPull,
+    output,
+  });
+
+  await ensureDirExists(cacheDir);
+
+  let ghFetcher = new GithubFetcher({ cache: cacheGithubReleases, cacheDir });
+  let gitFetcher = new GitFetcher({ dir: braveBrowser, gitPull });
 
   const [gitReleases] = await Promise.all([
-    fetchGit().then(fetchGitReleases),
-    ghFetcher.maybeInit(),
+    (async function() {
+      await gitFetcher.updateRepo();
+      return await gitFetcher.fetchGitReleases();
+    })(),
+    ghFetcher.fetchReleases(),
   ]);
 
   const ghReleases = await ghFetcher.update(gitReleases);
@@ -52,11 +89,11 @@ async function main() {
     finalReleases[tag] = finalRelease;
   }
 
-  let path = await braveVersionsDir('final-releases.json');
-  await writeJSON(path, finalReleases);
+  let bvPath = output || path.join(process.cwd(), 'brave-versions.json');
+  await writeJSON(bvPath, finalReleases);
   multibar.stop();
 
-  console.log(`wrote final data to ${path}`);
+  console.log(`wrote final data to ${bvPath}`);
 }
 
 main();

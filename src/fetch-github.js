@@ -1,29 +1,28 @@
+import path from 'path';
 import process from 'process';
 import url from 'url';
 
 import axios from 'axios';
 
-import { braveVersionsDir, multibar, pathExists, readJSON, sleep, writeJSON } from './util';
+import { multibar, pathExists, readJSON, sleep, writeJSON } from './util';
 
 const RELEASES_URL = 'https://api.github.com/repos/brave/brave-browser/releases';
 
-export async function fetchGithub() {
-  let ghReleasesPath = await braveVersionsDir('gh-releases.json');
-
-  let ghReleases = await pathExists(ghReleasesPath) ?
-    await readJSON(ghReleasesPath) :
-    undefined;
-
-  return new FetchGithub(ghReleasesPath, ghReleases);
-}
-
-export default class FetchGithub {
-  constructor(ghReleasesPath, releases) {
-    this.ghReleasesPath = ghReleasesPath || 'gh-releases.json';
-    this.releases = releases || [];
+export class GithubFetcher {
+  constructor({ cache, cacheDir }) {
+    this.cache = cache;
+    this.cacheDir = cacheDir;
+    this.releases = {};
   }
 
-  async maybeInit() {
+  async fetchReleases() {
+    if (this.cache) {
+      let ghReleases = path.join(this.cacheDir, 'gh-releases.json');
+      if (await pathExists(ghReleases)) {
+        this.releases = await readJSON(ghReleases);
+      }
+    }
+
     if (!this.releases || !Object.getOwnPropertyNames(this.releases).length) {
       await this.fetchAll();
       await this.writeReleases();
@@ -54,7 +53,9 @@ export default class FetchGithub {
   }
 
   async writeReleases() {
-    return await writeJSON(this.ghReleasesPath, this.releases);
+    if (this.cache) {
+      await writeJSON(this.ghReleasesPath, this.releases);
+    }
   }
 
   parseLinks(links) {
