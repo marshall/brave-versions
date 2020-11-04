@@ -1,0 +1,33 @@
+{
+  "name": "brave-versions",
+  "version": "0.1.0",
+  "description": "Generate an easily queryable metadata set about Brave releases",
+  "repository": "https://github.com/marshall/brave-versions",
+  "author": "Marshall Culpepper <mcu@brave.com>",
+  "license": "MPL-2.0",
+  "main": ".build/index.js",
+  "bin": {
+    "brave-versions": ".build/index.js"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "axios": "^0.21.0",
+    "cli-progress": "^3.8.2",
+    "dotenv": "^8.2.0"
+  },
+  "scripts": {
+    "build": "babel src -d .build",
+    "brave-versions": "yarn build && yarn link && yarn exec brave-versions",
+    "lint": "eslint src"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "eslint": "^7.12.1",
+    "eslint-config-standard": "^16.0.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1"
+  }
+}
