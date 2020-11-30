@@ -9,6 +9,7 @@ export const multibar = new cliProgress.MultiBar({
     clearOnComplete: false,
     hideCursor: true,
     format: '{title} [{bar}] {percentage}% | {filename} | ETA: {eta}s | {value}/{total}',
+    noTTYOutput: true,
 });
 
 export const sleep = promisify(setTimeout);

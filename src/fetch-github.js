@@ -117,9 +117,7 @@ export class GithubFetcher {
       let rateLimitReset;
 
       for (const response of await Promise.all(batch.map(async(url) => {
-        if (progress) {
-          progress.increment();
-        }
+        progress.increment();
         return await this.githubGet(url);
       }))) {
         this.insertReleases(response.data);

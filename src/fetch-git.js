@@ -76,9 +76,7 @@ export class GitFetcher {
         let pkg = JSON.parse(json);
         releases[tag].chrome_version = pkg.config.projects.chrome.tag
         releases[tag].widevine_version = pkg.config.widevine.version
-        if (progress) {
-          progress.increment({ filename: tag });
-        }
+        progress.increment({ filename: tag });
       } catch (e) {
         continue;
       }
