@@ -22,7 +22,7 @@ export class GitFetcher {
         return true;
       }
 
-      argv = ['pull']
+      argv = ['pull', '--tags']
       cwd = this.dir;
     }
 
